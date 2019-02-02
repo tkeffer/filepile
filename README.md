@@ -1,7 +1,24 @@
 # FilePile
-Add additional types to a WeeWX data stream via a file
+Add additional types to a WeeWX data stream using a file
 
-To use:
+## Installation instructions
+
+1) Install the extension
+
+    ```shell
+    wee_extension --install=path-to-filepile
+    ```
+
+2) Restart WeeWX. For example:
+
+   ```shell
+   sudo systemctl stop weewx
+   sudo systemctl start weewx
+   ```
+
+
+
+## Manual installation instructions
 
 1. Include a stanza in your `weewx.conf` configuration file that looks like this:
 
