@@ -3,44 +3,76 @@ WeeWX service for additional types from a file to a WeeWX data stream
 
 ## Installation instructions
 
-1) Install the extension
+1. Arrange to have your new data saved to a file, say `/var/tmp/pond.txt`. It should be in the following
+format:
+
+    ```
+    extraTemp1 = 45.5
+    extraHumid1 = None
+    myVoltage = 12.2
+    ```
+    
+    The value `None` is a valid value and signifies a bad data point.
+    
+2. Install the extension
 
     ```shell
     wee_extension --install=path-to-filepile
     ```
 
-2) Restart WeeWX. For example:
+3. Edit the new stanza `[FilePile]` to reflect your situation. Here's an example:
+
+   ```ini
+   [FilePile]
+       filename = /var/tmp/pond.txt
+       unit_system = US
+       [[label_map]]
+           myVoltage = supplyVoltage
+   ```
+   In this example, the incoming data will be found in the file `/var/tmp/pond.txt` and it
+will be in the [US Customary](http://weewx.com/docs/customizing.htm#units) unit system.
+
+   The incoming observation type `myVoltage` will get mapped to the WeeWX type `supplyVoltage`. The
+other two types in the file (`extraTemp1` and `extraHumid1` in the example above), do not appear in the mapping, so
+they will appear under their own names `extraTemp1` and `extraHumid1`.
+
+4. Restart WeeWX. For example:
 
    ```shell
    sudo systemctl stop weewx
    sudo systemctl start weewx
    ```
 
+5. On every archive interval, your temporary file will be read, parsed,
+and its contents added to the WeeWX record. 
 
 
 ## Manual installation instructions
 
-1. Include a stanza in your `weewx.conf` configuration file that looks like this:
+1. Arrange to have your new data saved to a file, say `/var/tmp/pond.txt`. It should be in the following
+format:
+
+    ```
+    extraTemp1 = 45.5
+    extraHumid1 = None
+    myVoltage = 12.2
+    ```
+    
+    The value `None` is a valid value and signifies a bad data point.
+    
+2. Include a stanza in your `weewx.conf` configuration file that looks like this. Adjust
+the options as necessary:
 
     ```ini
     [FilePile]
-        filename = /var/tmp/filepile.txt
-        unit_system = METRIC  # Or, 'US' or 'METRICWX'
+        filename = /var/tmp/pond.txt
+        unit_system = US  # Or, 'METRIC' or 'METRICWX'
         # Map from incoming names, to WeeWX names.
         [[label_map]]
-            temp1 = extraTemp1     # Incoming name 'temp1' will get mapped to 'extraTemp1'
-            humid1 = extraHumid1   # Incoming name 'humid1' will get mapped to 'extraHumid1'
+            myVoltage = supplyVoltage   # Incoming name 'myVoltage' will get mapped to 'supplyVoltage'
     ``` 
-    
-    The default values are:
 
-    |option | default| meaning |
-    | ----------- | ----------- | ----- |
-    |`filename`| `/var/tmp/filepile.txt`| Location of data file |
-    |`unit_system`| `METRICWX`| The unit system it will be in |
-    | `[[label_map]]` |  *no mapping*         | Map an incoming name to a WeeWX name|
-
-2. Add the FilePile service to the list of `data_services`:
+3. Add the FilePile service to the list of `data_services`:
 
     ```ini
     [Engine]
@@ -49,23 +81,21 @@ WeeWX service for additional types from a file to a WeeWX data stream
           data_services = user.filepile.FilePile
           ...
     
-3. Put this file (`filepile.py`) in your WeeWX `user` subdirectory.
+4. Put the file `filepile.py` in your WeeWX `user` subdirectory.
 For example, if you installed using `setup.py`:
 
     ```shell
     cp filepile.py /home/weewx/bin/user
     ```
 
-4. Have your external data source write values to the file
-(`/var/tmp/filepile.txt` in the example above) in the following
-format:    
+5. Restart WeeWX. For example:
 
-    ```
-    key = value
-    ```
-    where `key` is an observation name, and `value` is its value.
+   ```shell
+   sudo systemctl stop weewx
+   sudo systemctl start weewx
+   ```
 
-    If `key` appears in the `label_map`, then it will be mapped to a corresponding
-name. If not, then `key` will be used.
+6. On every archive interval, your temporary file will be read, parsed,
+and its contents added to the WeeWX record. 
 
-    The value `None` can be used to signify a bad data value.
+
