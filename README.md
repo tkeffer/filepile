@@ -1,5 +1,5 @@
 # FilePile
-Add additional types to a WeeWX data stream using a file
+WeeWX service for additional types from a file to a WeeWX data stream
 
 ## Installation instructions
 
@@ -49,8 +49,8 @@ Add additional types to a WeeWX data stream using a file
           data_services = user.filepile.FilePile
           ...
     
-3. Put this file (`filepile.py`) in your WeeWX user subdirectory.
-For example, if you installed using `setup.py`,
+3. Put this file (`filepile.py`) in your WeeWX `user` subdirectory.
+For example, if you installed using `setup.py`:
 
     ```shell
     cp filepile.py /home/weewx/bin/user
@@ -63,9 +63,9 @@ format:
     ```
     key = value
     ```
-where `key` is an observation name, and `value` is its value.
+    where `key` is an observation name, and `value` is its value.
 
-If `key` appears in the `label_map`, then it will be mapped to a corresponding
+    If `key` appears in the `label_map`, then it will be mapped to a corresponding
 name. If not, then `key` will be used.
 
-The value `None` can be used to signify a bad data value.
+    The value `None` can be used to signify a bad data value.
