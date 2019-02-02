@@ -1,5 +1,5 @@
 #
-#    Copyright (c) 2009-2015 Tom Keffer <tkeffer@gmail.com>
+#    Copyright (c) 2019 Tom Keffer <tkeffer@gmail.com>
 #
 #    See the file LICENSE.txt for your full rights.
 #
@@ -13,22 +13,31 @@ To use:
 [FilePile]
     filename = /var/tmp/filepile.txt
     unit_system = METRIC  # Or, 'US' or 'METRICWX'
+    # Map from incoming names, to WeeWX names.
+    [[label_map]]
+        temp1 = extraTemp1
+        humid1 = extraHumid1
 
 
-2. Add the FilePile service to the list of data_services:
+2. Add the FilePile service to the list of data_services to be run:
 
 [Engine]
   [[Services]]
     ...
     data_services = user.filepile.FilePile
 
-3. Have your external data source write values to the file
-('/var/tmp/filepile.txt' in the example above) in the following
+3. Put this file (filepile.py) in your WeeWX user subdirectory.
+For example, if you installed using setup.py,
+
+    cp filepile.py /home/weewx/bin/user
+
+4. Have your external data source write values to the file
+('/var/tmp/filepile.txt' in the example above) using the following
 format:
 
     key = value
 
-where key is an observation name, and value is its value.
+where 'key' is an observation name, and 'value' is its value.
 The value can be 'None'.
 """
 
@@ -40,6 +49,7 @@ from weeutil.weeutil import to_float
 
 
 class FilePile(StdService):
+    """WeeWX service for augmenting a record with data parsed from a file."""
 
     def __init__(self, engine, config_dict):
         # Initialize my superclass:
@@ -57,16 +67,20 @@ class FilePile(StdService):
         # Use the numeric code for the unit system
         self.unit_system = weewx.units.unit_constants[unit_system_name]
 
-        syslog.syslog(syslog.LOG_INFO, "filepile: using %s with the '%s' unit system"
+        # Mapping from variable names to weewx names
+        self.label_map = filepile_dict.get('label_map', {})
+
+        syslog.syslog(syslog.LOG_INFO, "filepile: Using %s with the '%s' unit system"
                       % (self.filename, unit_system_name))
+        syslog.syslog(syslog.LOG_INFO, "filepile: Label map is %s" % self.label_map)
 
         # Bind to the NEW_ARCHIVE_RECORD event
         self.bind(weewx.NEW_ARCHIVE_RECORD, self.new_archive_record)
 
     def new_archive_record(self, event):
-        new_record_data = {'usUnits' : self.unit_system}
+        new_record_data = {}
         try:
-            with open(self.filename, 'rb') as fd:
+            with open(self.filename, 'r') as fd:
                 for line in fd:
                     eq_index = line.find('=')
                     # Ignore all lines that do not have an equal sign
@@ -74,10 +88,13 @@ class FilePile(StdService):
                         continue
                     name = line[:eq_index].strip()
                     value = line[eq_index + 1:].strip()
-                    new_record_data[name] = to_float(value)
+                    new_record_data[self.label_map.get(name, name)] = to_float(value)
+                # Supply a unit system if one wasn't included in the file
+                if 'usUnits' not in new_record_data:
+                    new_record_data['usUnits'] = self.unit_system
                 # Convert the new values to the same unit system as the record
                 target_data = weewx.units.to_std_system(new_record_data, event.record['usUnits'])
-                # Add the new values to the record:
-                self.event.record.update(target_data)
-        except Exception as e:
-            syslog.syslog(syslog.LOG_ERR, "filepile: cannot open file. Reason: %s" % e)
+                # Add the converted values to the record:
+                event.record.update(target_data)
+        except IOError as e:
+            syslog.syslog(syslog.LOG_ERR, "FilePile: Cannot open file. Reason: %s" % e)
