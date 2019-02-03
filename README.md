@@ -18,7 +18,7 @@ format:
 
     ```shell
     cd /home/weewx
-    wget https://github.com/tkeffer/filepile/archive/v1.0.0.tar.gz -O filepile-1.0.0.tar.gz
+    wget https://github.com/tkeffer/filepile/archive/filepile-1.0.0.tar.gz
     wee_extension --install=filepile-1.0.0.tar.gz
     ```
 
