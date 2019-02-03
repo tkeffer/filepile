@@ -14,10 +14,12 @@ format:
     
     The value `None` is a valid value and signifies a bad data point.
     
-2. Install the extension
+2. Download and install the extension
 
     ```shell
-    wee_extension --install=path-to-filepile
+    cd /home/weewx
+    wget https://github.com/tkeffer/filepile/archive/v1.0.0.tar.gz -O filepile-1.0.0.tar.gz
+    wee_extension --install=filepile-1.0.0.tar.gz
     ```
 
 3. Edit the new stanza `[FilePile]` to reflect your situation. Here's an example:
