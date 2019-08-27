@@ -41,11 +41,43 @@ where 'key' is an observation name, and 'value' is its value.
 The value can be 'None'.
 """
 
-import syslog
 import weewx
 import weewx.units
 from weewx.wxengine import StdService
 from weeutil.weeutil import to_float
+
+VERSION = "0.20"
+
+try:
+    # Test for new-style weewx logging by trying to import weeutil.logger
+    import weeutil.logger
+    import logging
+    log = logging.getLogger(__name__)
+
+    def logdbg(msg):
+        log.debug(msg)
+
+    def loginf(msg):
+        log.info(msg)
+
+    def logerr(msg):
+        log.error(msg)
+
+except ImportError:
+    # Old-style weewx logging
+    import syslog
+
+    def logmsg(level, msg):
+        syslog.syslog(level, 'filepile: %s:' % msg)
+
+    def logdbg(msg):
+        logmsg(syslog.LOG_DEBUG, msg)
+
+    def loginf(msg):
+        logmsg(syslog.LOG_INFO, msg)
+
+    def logerr(msg):
+        logmsg(syslog.LOG_ERR, msg)
 
 
 class FilePile(StdService):
@@ -70,9 +102,8 @@ class FilePile(StdService):
         # Mapping from variable names to weewx names
         self.label_map = filepile_dict.get('label_map', {})
 
-        syslog.syslog(syslog.LOG_INFO, "filepile: Using %s with the '%s' unit system"
-                      % (self.filename, unit_system_name))
-        syslog.syslog(syslog.LOG_INFO, "filepile: Label map is %s" % self.label_map)
+        loginf("Using %s with the '%s' unit system" % (self.filename, unit_system_name))
+        loginf("Label map is %s" % self.label_map)
 
         # Bind to the NEW_ARCHIVE_RECORD event
         self.bind(weewx.NEW_ARCHIVE_RECORD, self.new_archive_record)
@@ -97,4 +128,4 @@ class FilePile(StdService):
                 # Add the converted values to the record:
                 event.record.update(target_data)
         except IOError as e:
-            syslog.syslog(syslog.LOG_ERR, "FilePile: Cannot open file. Reason: %s" % e)
+            logerr("Cannot open file. Reason: %s" % e)
