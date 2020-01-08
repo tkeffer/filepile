@@ -46,7 +46,7 @@ import weewx.units
 from weewx.wxengine import StdService
 from weeutil.weeutil import to_float
 
-VERSION = "0.20"
+VERSION = "0.30"
 
 try:
     # Test for new-style weewx logging by trying to import weeutil.logger
@@ -119,7 +119,12 @@ class FilePile(StdService):
                         continue
                     name = line[:eq_index].strip()
                     value = line[eq_index + 1:].strip()
-                    new_record_data[self.label_map.get(name, name)] = to_float(value)
+                    # Values which are empty strings are interpreted as None
+                    if value == '':
+                        value_f = None
+                    else:
+                        value_f = to_float(value)
+                    new_record_data[self.label_map.get(name, name)] = value_f
                 # Supply a unit system if one wasn't included in the file
                 if 'usUnits' not in new_record_data:
                     new_record_data['usUnits'] = self.unit_system
