@@ -28,11 +28,13 @@ format:
    [FilePile]
        filename = /var/tmp/pond.txt
        unit_system = US
+       ignore_value_error = False   
        [[label_map]]
            myVoltage = supplyVoltage
    ```
    In this example, the incoming data will be found in the file `/var/tmp/pond.txt` and it
-will be in the [US Customary](http://weewx.com/docs/customizing.htm#units) unit system.
+will be in the [US Customary](http://weewx.com/docs/customizing.htm#units) unit system. See
+   below for option `ignore_value_error`.
 
    The incoming observation type `myVoltage` will get mapped to the WeeWX type `supplyVoltage`. The
 other two types in the file (`extraTemp1` and `extraHumid1` in the example above), do not appear in the mapping, so
@@ -69,6 +71,7 @@ the options as necessary:
     [FilePile]
         filename = /var/tmp/pond.txt
         unit_system = US  # Or, 'METRIC' or 'METRICWX'
+        ignore_value_error = False
         # Map from incoming names, to WeeWX names.
         [[label_map]]
             myVoltage = supplyVoltage   # Incoming name 'myVoltage' will get mapped to 'supplyVoltage'
@@ -100,4 +103,13 @@ For example, if you installed using `setup.py`:
 6. On every archive interval, your temporary file will be read, parsed,
 and its contents added to the WeeWX record. 
 
+## Options
 
+**`ignore_value_error`** controls what happens if a value is unable to be converted
+to a floating point value. Examples:
+
+    outTemp = foo
+    windSpeed = N/A
+
+If set to `False` (the default), an exception of type `ValueError` will be raised, which is likely to cause program
+termination. If set to `True`, the value will be ignored.

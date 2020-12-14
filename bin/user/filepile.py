@@ -13,6 +13,7 @@ To use:
 [FilePile]
     filename = /var/tmp/filepile.txt
     unit_system = METRIC  # Or, 'US' or 'METRICWX'
+    ignore_value_error = False
     # Map from incoming names, to WeeWX names.
     [[label_map]]
         temp1 = extraTemp1
@@ -44,7 +45,7 @@ The value can be 'None'.
 import weewx
 import weewx.units
 from weewx.wxengine import StdService
-from weeutil.weeutil import to_float
+from weeutil.weeutil import to_float, to_bool
 
 VERSION = "0.30"
 
@@ -98,6 +99,7 @@ class FilePile(StdService):
             raise ValueError("FilePile: Unknown unit system: %s" % unit_system_name)
         # Use the numeric code for the unit system
         self.unit_system = weewx.units.unit_constants[unit_system_name]
+        self.ignore_value_error = to_bool(filepile_dict.get('ignore_value_error', False))
 
         # Mapping from variable names to weewx names
         self.label_map = filepile_dict.get('label_map', {})
@@ -123,7 +125,13 @@ class FilePile(StdService):
                     if value == '':
                         value_f = None
                     else:
-                        value_f = to_float(value)
+                        try:
+                            value_f = to_float(value)
+                        except ValueError as e:
+                            if self.ignore_value_error:
+                                continue
+                            logerr("Could not convert to float: %s" % value)
+                            raise
                     new_record_data[self.label_map.get(name, name)] = value_f
                 # Supply a unit system if one wasn't included in the file
                 if 'usUnits' not in new_record_data:
