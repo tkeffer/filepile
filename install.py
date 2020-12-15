@@ -38,7 +38,7 @@ def loader():
 class FilePileInstaller(ExtensionInstaller):
     def __init__(self):
         super(FilePileInstaller, self).__init__(
-            version="0.20",
+            version="0.4",
             name='filepile',
             description='Augment WeeWX records with data from a file',
             author="Thomas Keffer",

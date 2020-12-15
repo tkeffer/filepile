@@ -1,3 +1,6 @@
+0.4 15dec20
+* Added option ignore_value_error
+
 0.30 08jan20
 * empty values are now interpreted as 'None'
 

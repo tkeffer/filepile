@@ -47,7 +47,7 @@ import weewx.units
 from weewx.wxengine import StdService
 from weeutil.weeutil import to_float, to_bool
 
-VERSION = "0.30"
+VERSION = "0.4"
 
 try:
     # Test for new-style weewx logging by trying to import weeutil.logger
