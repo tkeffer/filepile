@@ -18,8 +18,8 @@ format:
 
     ```shell
     cd /home/weewx
-    wget https://github.com/tkeffer/filepile/archive/filepile-1.0.0.tar.gz
-    wee_extension --install=filepile-1.0.0.tar.gz
+    wget https://github.com/tkeffer/filepile/archive/master.zip
+    wee_extension --install=master.zip
     ```
 
 3. Edit the new stanza `[FilePile]` to reflect your situation. Here's an example:
