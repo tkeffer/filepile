@@ -17,9 +17,7 @@ format:
 2. Download and install the extension
 
     ```shell
-    cd /home/weewx
-    wget https://github.com/tkeffer/filepile/archive/master.zip
-    wee_extension --install=master.zip
+    weectl extension install https://github.com/tkeffer/filepile/archive/master.zip
     ```
 
 3. Edit the new stanza `[FilePile]` to reflect your situation. Here's an example:
